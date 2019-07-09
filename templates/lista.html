@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Jogoteca</title>
+</head>
+<body>
+    <div class="container">
+        <h1>{{titulo}}</h1>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Console</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for jogo in jogos %}
+            <tr>
+                <td>{{ jogo.nome }}</td>
+                <td>{{ jogo.categoria }}</td>
+                <td>{{ jogo.console }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </div>
+
+</body>
+</html>
