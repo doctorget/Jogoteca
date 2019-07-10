@@ -1,0 +1,12 @@
+
+{% extends 'template.html' %}
+{% block conteudo %}
+    <h1>Faça seu Login</h1>
+    <form action="/autenticar" method="POST">
+        <p><label for="nome de usuario">Nome de Usuario</label>
+        <input type="text" class="form-control" name="nomeUsuario"></p>
+        <p><label for="Senha">Senha:</label>
+        <input type="password" class="form-control" name="senha"></p>
+        <p><button class="btn btn-primary" type="submit">Entrar</button></p>
+    </form>
+{% endblock %}
