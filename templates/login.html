@@ -1,6 +1,17 @@
 
 {% extends 'template.html' %}
 {% block conteudo %}
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul id="messages" class="list-unstyled">
+                {% for message in messages %}
+                <li class="alert alert-sucess">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <h1>Faça seu Login</h1>
     <form action="/autenticar" method="POST">
         <p><label for="nome de usuario">Nome de Usuario</label>
