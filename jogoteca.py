@@ -43,4 +43,11 @@ def autenticar():
     else:
         flash('Não logado, Tente Novamente')
         return redirect('/login')
+
+@app.route('/logout')
+def logout():
+    session['usuario_logado'] = None
+    flash('Nenhum Usuario Logado!')
+    return redirect('/')
+
 app.run(debug=True)
