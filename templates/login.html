@@ -13,7 +13,8 @@
     {% endwith %}
 
     <h1>Faça seu Login</h1>
-    <form action="/autenticar" method="POST">
+    <form action="{{ url_for('autenticar') }}" method="POST">
+        <input type="hidden" name="proxima" value="{{ proxima or url_for('index') }}">
         <p><label for="nome de usuario">Nome de Usuario</label>
         <input type="text" class="form-control" name="usuario" required></p>
         <p><label for="Senha">Senha:</label>
