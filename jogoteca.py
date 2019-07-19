@@ -20,13 +20,15 @@ usuario2 = Usuario('samuel', 'Samuel Soares', 'mestra')
 usuario3 = Usuario('niko', 'Niko Steppat', '7a1')
 
 usuarios = {
-    usuario1.id: usuario1, usuario2.id: usuario2, usuario3.id: usuario3
+    usuario1.id: usuario1,
+    usuario2.id: usuario2,
+    usuario3.id: usuario3
 }
 
  
 jogo1 = Jogo('Super Mario', 'Ação', 'SNES')
 jogo2 = Jogo('Pokemon Gold', 'RPG', 'GBA')
-jogo3 = Jogo('Mortal Kombat', 'Luta', 'SNES')
+jogo3 = Jogo('Mortal Kombat', 'Luta', 'SNES') 
 lista = [jogo1, jogo2, jogo3]
 
 @app.route('/')
