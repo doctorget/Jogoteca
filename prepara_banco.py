@@ -1,34 +1,43 @@
-import MySQLdb
+import sqlite3
+from wrap_connection import transact
+
 print('Conectando ...')
-conn = MySQLdb.connect(user='root', passwd='admin', host='127.0.0.1', port=3306)
+
+conn = sqlite3.connect("jogoteca.db")
+
+def make_connection():
+    conn = sqlite3.connect("jogoteca.db")
+    return conn
 
 # Descomente se quiser desfazer o banco...
-conn.cursor().execute("DROP DATABASE `jogoteca`;")
-conn.commit()
+#conn.cursor().execute("DROP DATABASE `jogoteca;")
+#conn.commit()
 
-criar_tabelas = '''SET NAMES utf8;
-    CREATE DATABASE `jogoteca` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
-    USE `jogoteca`;
+criar_tabelas = '''
     CREATE TABLE `jogo` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `nome` varchar(50) COLLATE utf8_bin NOT NULL,
-      `categoria` varchar(40) COLLATE utf8_bin NOT NULL,
-      `console` varchar(20) NOT NULL,
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+      id int(11) NOT NULL PRIMARY KEY,
+      nome varchar(50) NOT NULL,
+      categoria varchar(40) NOT NULL,
+      console varchar(20) NOT NULL,
+    )
     CREATE TABLE `usuario` (
-      `id` varchar(8) COLLATE utf8_bin NOT NULL,
-      `nome` varchar(20) COLLATE utf8_bin NOT NULL,
-      `senha` varchar(8) COLLATE utf8_bin NOT NULL,
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;'''
+      id varchar(8) NOT NULL,
+      nome` varchar(20) NOT NULL,
+      senha` varchar(8) NOT NULL,
+      PRIMARY KEY (id)
+    )'''
 
-conn.cursor().execute(criar_tabelas)
+@transact(make_connection)
+def criar_db():
+    conn.cursor().execute(criar_tabelas)
+    conn.commit()
+    
+criar_db()
 
 # inserindo usuarios
 cursor = conn.cursor()
 cursor.executemany(
-      'INSERT INTO jogoteca.usuario (id, nome, senha) VALUES (%s, %s, %s)',
+      'INSERT INTO jogoteca.usuario (id, nome, senha) VALUES (?, ?, ?)',
       [
             ('luan', 'Luan Marques', 'flask'),
             ('nico', 'Nico', '7a1'),
@@ -42,7 +51,7 @@ for user in cursor.fetchall():
 
 # inserindo jogos
 cursor.executemany(
-      'INSERT INTO jogoteca.jogo (nome, categoria, console) VALUES (%s, %s, %s)',
+      'INSERT INTO jogoteca.jogo (nome, categoria, console) VALUES (?, ?, ?)',
       [
             ('God of War 4', 'Acao', 'PS4'),
             ('NBA 2k18', 'Esporte', 'Xbox One'),
