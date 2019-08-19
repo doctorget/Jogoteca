@@ -3,19 +3,30 @@ import sqlite3
 database = sqlite3.connect('jogoteca.db')
 cursor = database.cursor()
 
-'''cursor.execute(CREATE TABLE `jogo` (
+'''cursor.execute('CREATE TABLE jogo (
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
       nome varchar(50) NOT NULL,
       categoria varchar(40) NOT NULL,
-      console varchar(20) NOT NULL,
-    )'')'''
+      console varchar(20) NOT NULL
+    )')'''
+
+cursor.execute('select * from usuario')
+for jogo in cursor.fetchall():
+  print(jogo[1])
 
 '''cursor.execute(''CREATE TABLE usuario (
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      nome` varchar(20) NOT NULL,
-      senha` varchar(8) NOT NULL,
-    )'')'''
+      nome varchar(20) NOT NULL,
+      senha varchar(8) NOT NULL
+)'')'''
 
+'''cursor.executemany(
+      'INSERT INTO usuario (nome, senha) VALUES (?, ?)',
+      [
+            ('Luan Marques', 'flask'),
+            ('Nico', '7a1'),
+            ('Danilo', 'vegas')
+      ])'''
 
 '''cursor.executemany(
       'INSERT INTO jogo (id,  nome, categoria, console) VALUES (?,?, ?, ?)',

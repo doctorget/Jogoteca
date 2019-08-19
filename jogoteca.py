@@ -5,7 +5,8 @@ import sqlite3
 app = Flask(__name__)
 app.secret_key = 'sessao'
 
-database = sqlite3.connect('jogoteca.db')
+database = sqlite3.connect('jogoteca.db') #banco 
+cursor = database.cursor() # cursor de manipulação do banco
 
 class Jogo:
     def __init__(self, nome, categoria, console):
@@ -21,6 +22,13 @@ class Usuario:
         self.id = id
         self.nome = nome
         self.senha = senha
+
+lista = [] 
+cursor.execute('select * from jogo')
+#jogos = []
+for jogo in cursor.fetchall():
+    lista.append(Jogo(jogo[0],jogo[1],jogo[2]))
+
 
 @app.route('/')
 def index():
