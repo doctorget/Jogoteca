@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 
+import sqlite3
+
 app = Flask(__name__)
 app.secret_key = 'sessao'
+
+database = sqlite3.connect('jogoteca.db')
 
 class Jogo:
     def __init__(self, nome, categoria, console):
@@ -9,27 +13,14 @@ class Jogo:
         self.categoria = categoria
         self.console = console
 
+lista = {
+    'jogo':'alex'
+}
 class Usuario:
     def __init__(self, id, nome, senha):
         self.id = id
         self.nome = nome
         self.senha = senha
-
-usuario1 = Usuario('luan', 'Luan Marques', '1234')
-usuario2 = Usuario('samuel', 'Samuel Soares', 'mestra')
-usuario3 = Usuario('niko', 'Niko Steppat', '7a1')
-
-usuarios = {
-    usuario1.id: usuario1,
-    usuario2.id: usuario2,
-    usuario3.id: usuario3
-}
-
- 
-jogo1 = Jogo('Super Mario', 'Ação', 'SNES')
-jogo2 = Jogo('Pokemon Gold', 'RPG', 'GBA')
-jogo3 = Jogo('Mortal Kombat', 'Luta', 'SNES') 
-lista = [jogo1, jogo2, jogo3]
 
 @app.route('/')
 def index():
