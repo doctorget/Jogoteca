@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
-
+from dao import JogoDao
 import sqlite3
 
 app = Flask(__name__)
@@ -8,13 +8,14 @@ app.secret_key = 'sessao'
 database = sqlite3.connect('jogoteca.db') #banco 
 cursor = database.cursor() # cursor de manipulação do banco
 
+
 class Jogo:
     def __init__(self, nome, categoria, console):
         self.nome = nome
         self.categoria = categoria
         self.console = console
 
-lista = {
+lista1 = {
     'jogo':'alex'
 }
 class Usuario:
@@ -46,7 +47,7 @@ def criar():
     categoria = request.form['categoria']
     console = request.form['console']
     jogo = Jogo(nome, categoria, console)
-    lista.append(jogo)
+    jogo_dao.salvar(jogo)
     return redirect(url_for('index'))
 
 @app.route('/login')
