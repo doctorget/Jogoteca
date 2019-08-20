@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
-from dao import JogoDao
+#from dao import JogoDao
 import sqlite3
 
 app = Flask(__name__)
@@ -7,7 +7,7 @@ app.secret_key = 'sessao'
 
 database = sqlite3.connect('jogoteca.db') #banco 
 cursor = database.cursor() # cursor de manipulação do banco
-
+jogo_dao = cursor
 
 class Jogo:
     def __init__(self, nome, categoria, console):
@@ -19,8 +19,7 @@ lista1 = {
     'jogo':'alex'
 }
 class Usuario:
-    def __init__(self, id, nome, senha):
-        self.id = id
+    def __init__(self, nome, senha):
         self.nome = nome
         self.senha = senha
 
@@ -28,11 +27,12 @@ lista = []
 cursor.execute('select * from jogo')
 #jogos = []
 for jogo in cursor.fetchall():
-    lista.append(Jogo(jogo[0],jogo[1],jogo[2]))
+    lista.append(Jogo(jogo[1],jogo[2],jogo[3]))
 
 
 @app.route('/')
 def index():
+    
     return render_template("lista.html", titulo='Jogos', jogos=lista)
 
 @app.route('/novo')
@@ -55,8 +55,14 @@ def login():
     proxima = request.args.get('proxima')# variavel que foi definida no redirect
     return render_template('login.html', proxima=proxima)
 
+
 @app.route('/autenticar', methods=['POST'])
 def autenticar():
+    usuarios = [] 
+    cursor.execute('select * from usuario')
+    #jogos = []
+    for user in cursor.fetchall():
+        usuarios.append(Jogo(user[1],user[2]))
     if request.form['usuario'] in usuarios:
         usuario = usuarios[request.form['usuario']]
         if usuario.senha == request.form['senha']:

@@ -1,4 +1,5 @@
 import sqlite3
+#from jogoteca import Jogo,Usuario
 
 database = sqlite3.connect('jogoteca.db')
 cursor = database.cursor()
@@ -10,10 +11,14 @@ cursor = database.cursor()
       console varchar(20) NOT NULL
     )')'''
 
+usuarios = [] 
 cursor.execute('select * from usuario')
-for jogo in cursor.fetchall():
-  print(jogo[1])
-
+#jogos = []
+for user in cursor.fetchall():
+      print(user[1])
+      tup = (user[1],user[2])
+      usuarios.append(tup)
+print(usuarios)
 '''cursor.execute(''CREATE TABLE usuario (
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       nome varchar(20) NOT NULL,
