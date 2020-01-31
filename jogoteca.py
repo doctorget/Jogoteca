@@ -1,83 +1,126 @@
-from flask import Flask, render_template, request, redirect, session, flash, url_for
-#from dao import JogoDao
-import sqlite3
+from flask import Flask, render_template, request, redirect, session, flash, url_for, send_from_directory
+from dao import JogoDao, UsuarioDao
+from flask_mysqldb import MySQL
+from models import Jogo, Usuario
+import os, time
 
 app = Flask(__name__)
-app.secret_key = 'sessao'
+app.secret_key = 'alura'
 
-database = sqlite3.connect('jogoteca.db') #banco 
-cursor = database.cursor() # cursor de manipulação do banco
-jogo_dao = cursor
+app.config['MYSQL_HOST'] = "localhost"
+app.config['MYSQL_USER'] = "root"
+app.config['MYSQL_PASSWORD'] = "admin"
+app.config['MYSQL_DB'] = "jogoteca"
+app.config['MYSQL_PORT'] = 3306
 
-class Jogo:
-    def __init__(self, nome, categoria, console):
-        self.nome = nome
-        self.categoria = categoria
-        self.console = console
+app.config['UPLOAD_PATH'] = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
 
-lista1 = {
-    'jogo':'alex'
-}
-class Usuario:
-    def __init__(self, nome, senha):
-        self.nome = nome
-        self.senha = senha
-
-lista = [] 
-cursor.execute('select * from jogo')
-#jogos = []
-for jogo in cursor.fetchall():
-    lista.append(Jogo(jogo[1],jogo[2],jogo[3]))
+db = MySQL(app)
+jogo_dao = JogoDao(db)
+usuario_dao = UsuarioDao(db)
 
 
 @app.route('/')
 def index():
-    
-    return render_template("lista.html", titulo='Jogos', jogos=lista)
+    lista = jogo_dao.listar()
+    return render_template('lista.html', titulo='Jogos', jogos=lista)
+
 
 @app.route('/novo')
 def novo():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        return redirect(url_for('login', proxima= url_for('novo'))) #chama a função login e passa a proxima pagina como parametro
+        return redirect(url_for('login', proxima=url_for('novo')))
     return render_template('novo.html', titulo='Novo Jogo')
 
-@app.route('/criar', methods=['POST'])
+
+@app.route('/criar', methods=['POST',])
 def criar():
-    nome = request.form['nome'] #name de nome no formulario
+    nome = request.form['nome']
     categoria = request.form['categoria']
     console = request.form['console']
     jogo = Jogo(nome, categoria, console)
+    jogo = jogo_dao.salvar(jogo)
+
+    arquivo = request.files['arquivo']
+    upload_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
+    return redirect(url_for('index'))
+
+
+@app.route('/editar/<int:id>')
+def editar(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        return redirect(url_for('login', proxima=url_for('editar')))
+    jogo = jogo_dao.busca_por_id(id)
+    nome_imagem = recupera_imagem(id)
+    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo
+                           , capa_jogo=nome_imagem or 'capa_padrao.jpg')
+
+
+def recupera_imagem(id):
+    for nome_arquivo in os.listdir(app.config['UPLOAD_PATH']):
+        if f'capa{id}' in nome_arquivo:
+            return nome_arquivo
+
+
+def deleta_arquivo(id):
+    arquivo = recupera_imagem(id)
+    os.remove(os.path.join(app.config['UPLOAD_PATH'], arquivo))
+
+
+@app.route('/atualizar', methods=['POST',])
+def atualizar():
+    nome = request.form['nome']
+    categoria = request.form['categoria']
+    console = request.form['console']
+    jogo = Jogo(nome, categoria, console, id=request.form['id'])
+
+    arquivo = request.files['arquivo']
+    upload_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    deleta_arquivo(jogo.id)
+    arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
     jogo_dao.salvar(jogo)
+    return redirect(url_for('index'))
+
+
+@app.route('/deletar/<int:id>')
+def deletar(id):
+    jogo_dao.deletar(id)
+    flash('O jogo foi removido com sucesso!')
     return redirect(url_for('index'))
 
 @app.route('/login')
 def login():
-    proxima = request.args.get('proxima')# variavel que foi definida no redirect
+    proxima = request.args.get('proxima')
     return render_template('login.html', proxima=proxima)
 
 
-@app.route('/autenticar', methods=['POST'])
+@app.route('/autenticar', methods=['POST', ])
 def autenticar():
-    usuarios = [] 
-    cursor.execute('select * from usuario')
-    #jogos = []
-    for user in cursor.fetchall():
-        usuarios.append(Jogo(user[1],user[2]))
-    if request.form['usuario'] in usuarios:
-        usuario = usuarios[request.form['usuario']]
+    usuario = usuario_dao.buscar_por_id(request.form['usuario'])
+    if usuario:
         if usuario.senha == request.form['senha']:
-            session['usuario_logado'] = usuario.id #salva a sessão do usuario em um cookie
-            flash(usuario.nome + ' logou com sucesso!') #mostra uma msg rapida pro usuario
+            session['usuario_logado'] = usuario.id
+            flash(usuario.nome + ' logou com sucesso!')
             proxima_pagina = request.form['proxima']
             return redirect(proxima_pagina)
     else:
-        flash('Não logado, Tente Novamente')
+        flash('Não logado, tente denovo!')
         return redirect(url_for('login'))
+
 
 @app.route('/logout')
 def logout():
     session['usuario_logado'] = None
-    flash('Nenhum Usuario Logado!')
-    return redirect(url_for('index')) #o url_for é a função da rota que vai ser chamada
+    flash('Nenhum usuário logado!')
+    return redirect(url_for('index'))
+
+
+@app.route('/uploads/<nome_arquivo>')
+def imagem(nome_arquivo):
+    return send_from_directory('uploads', nome_arquivo)
+
 
 app.run(debug=True)
